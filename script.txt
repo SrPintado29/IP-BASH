@@ -1,0 +1,79 @@
+#!/bin/bash
+
+echo ---- Selecciona la tarea a realizar:----
+
+echo 1.Realiza un whois sobre la IP/URL indicada.
+
+echo 2.Realiza un ping sobre IP/URL + obtiene host destino
+
+echo 3.Realiza un traceroute a una IP/URL. 
+
+echo "\n"
+
+echo Por favor, selecciona accion: 
+
+read num
+
+
+
+case $num in
+
+	1)
+
+		echo [NOTA]: debes de tener previamente el comando instalado. Para instalarlo teclea: sudo apt-get install whois
+
+		echo Introduce una IP o una URL:
+
+		read ip
+
+		echo "\n"
+
+		whois $ip
+
+	;;
+
+	2)
+
+		echo Introduce una IP/URL para realizar el ping: 
+
+		read ip
+
+		echo Introduce el numero de paquetes ICMP que quieres enviar: 
+
+		read veces
+
+		echo "\n"
+
+		echo Realizando ping...
+
+		ping -a -c$veces $ip
+
+		echo "\n"
+
+		echo ping desde el host: ; ping -a -c$veces $ip | awk '{print $4}' | head -2 | sed -n 2p
+
+		echo ping hasta el host: 
+
+		ping -a -c3 www.google.es | head -1 | awk '{print $2}' ; echo con IP: ; ping -a -c3 www.google.es | head -1 | awk '{print $3}'
+
+	;;
+
+	3)
+
+		echo [NOTA]: debes de tener previamente el comando instalado. Para instalarlo teclea: sudo apt-get install traceroute
+
+		echo Introduce IP/URL para realizar el traceroute.
+
+		read ip
+
+		echo Listado de IP/Host por los que va pasando: 
+
+		traceroute $ip | awk '{print $2}' | head -2
+
+		$var = traceroute $ip | awk '{print $2}' | wc -l
+
+		echo El numero de saltos es: $var
+
+	;;
+
+esac
