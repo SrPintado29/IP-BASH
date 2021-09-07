@@ -4,9 +4,11 @@ echo ---- Selecciona la tarea a realizar:----
 
 echo 1.Realiza un whois sobre la IP/URL indicada.
 
-echo 2.Realiza un ping sobre IP/URL + obtiene host destino
+echo 2.Realiza un ping sobre IP/URL + obtiene host destino.
 
 echo 3.Realiza un traceroute a una IP/URL. 
+
+echo 4.Obtencion de IP detras de un nombre de dominio.
 
 echo "\n"
 
@@ -73,6 +75,14 @@ case $num in
 		$var = traceroute $ip | awk '{print $2}' | wc -l
 
 		echo El numero de saltos es: $var
+
+	;;
+
+	4)
+		echo Introduce un dominio:
+		read dom 
+		echo La IP del dominio $dom es: 		
+		dig $dom +short
 
 	;;
 
