@@ -1,89 +1,76 @@
 #!/bin/bash
 
-echo ---- Selecciona la tarea a realizar:----
+# Creacion del script 27-02-23 - JLP 
 
-echo 1.Realiza un whois sobre la IP/URL indicada.
+# Función que realiza un ping a una dirección IP dada:
+function do_ping {
+    read -p "Introduce la dirección IP a la que quieres hacer ping: " ip
+    ping -c 3 $ip
+}
 
-echo 2.Realiza un ping sobre IP/URL + obtiene host destino.
+# Función que realiza una búsqueda WHOIS para un dominio dado:
+function do_whois {
+    read -p "Introduce el nombre de dominio para realizar la búsqueda WHOIS: " domain
+    whois $domain
+}
 
-echo 3.Realiza un traceroute a una IP/URL. 
+# Función que escanea todo el rango de direcciones IP del segmento de red actual:
+function do_network_scan {
+    subnet=$(ip -o -f inet addr show | awk '/scope global/ {print $4}')
+    nmap -sP $subnet
+}
 
-echo 4.Obtencion de IP detras de un nombre de dominio.
+# Función que realiza un escaneo silencioso de puertos a una dirección IP dada: 
+function do_port_scan {
+    read -p "Introduce la dirección IP que quieres escanear: " ip
+    nmap -p- -sV -T4 -oN scan.txt -oX scan.xml -oG scan.gnmap --reason --open --stats-every 10s -v $ip >/dev/null
+    echo "El escaneo de puertos ha finalizado. Los resultados se han guardado en los archivos scan.txt, scan.xml y scan.gnmap."
+}
 
-echo "\n"
+# Función que permite modificar los parametros de configuración de la tarjeta de red:
+function modify_network_settings {
+    echo "Configuración actual de la tarjeta de red:"
+    ip addr show
+    echo "Introduce los nuevos ajustes de configuración de la tarjeta de red:"
+    read -p "Dirección IP: " ip_address
+    read -p "Máscara de red: " netmask
+    read -p "Gateway: " gateway
+    read -p "Servidor DNS primario: " dns1
+    read -p "Servidor DNS secundario: " dns2
+    sudo ip addr add $ip_address/$netmask dev eth0
+    sudo ip route add default via $gateway
+    sudo echo "nameserver $dns1" | sudo tee /etc/resolv.conf
+    sudo echo "nameserver $dns2" | sudo tee -a /etc/resolv.conf
+    echo "La configuración de la tarjeta de red se ha actualizado correctamente."
+}
 
-echo Por favor, selecciona accion: 
+# Función que guarda la información en un fichero:
+function save_to_file {
+    read -p "Introduce el nombre del archivo para guardar la información: " filename
+    echo "Guardando información en el archivo $filename"
+    # Agrega aquí el código para guardar la información que se haya generado
+}
 
-read num
+# Bucle principal que muestra el menú de opciones a elegir:
+while true; do
+    echo "Menú de opciones:"
+    echo "1. Realizar ping"
+    echo "2. Realizar búsqueda WHOIS"
+    echo "3. Escanear todo el rango de direcciones IP de tu segmento de red"
+    echo "4. Realizar un escaneo de puertos"
+    echo "5. Modificar ajustes de configuración de la tarjeta de red"
+    echo "6. Guardar la información en un archivo"
+    echo "0. Salir/Exit"
+    read -p "Introduce el número de opción que deseas ejecutar: " choice
 
-
-
-case $num in
-
-	1)
-
-		echo [NOTA]: debes de tener previamente el comando instalado. Para instalarlo teclea: sudo apt-get install whois
-
-		echo Introduce una IP o una URL:
-
-		read ip
-
-		echo "\n"
-
-		whois $ip
-
-	;;
-
-	2)
-
-		echo Introduce una IP/URL para realizar el ping: 
-
-		read ip
-
-		echo Introduce el numero de paquetes ICMP que quieres enviar: 
-
-		read veces
-
-		echo "\n"
-
-		echo Realizando ping...
-
-		ping -a -c$veces $ip
-
-		echo "\n"
-
-		echo ping desde el host: ; ping -a -c$veces $ip | awk '{print $4}' | head -2 | sed -n 2p
-
-		echo ping hasta el host: 
-
-		ping -a -c3 www.google.es | head -1 | awk '{print $2}' ; echo con IP: ; ping -a -c3 www.google.es | head -1 | awk '{print $3}'
-
-	;;
-
-	3)
-
-		echo [NOTA]: debes de tener previamente el comando instalado. Para instalarlo teclea: sudo apt-get install traceroute
-
-		echo Introduce IP/URL para realizar el traceroute.
-
-		read ip
-
-		echo Listado de IP/Host por los que va pasando: 
-
-		traceroute $ip | awk '{print $2}' | head -2
-
-		$var = traceroute $ip | awk '{print $2}' | wc -l
-
-		echo El numero de saltos es: $var
-
-	;;
-
-	4)
-		echo Introduce un dominio:
-		read dom 
-		echo La IP del dominio $dom es: 		
-		dig $dom +short
-
-	;;
-
-esac
+    case $choice in
+        1) do_ping ;;
+        2) do_whois ;;
+        3) do_network_scan ;;
+	4) do_port_scan ;;
+	5) modify_network_settings ;;
+	6) save_to_file ;;
+	0) exit ;;
+        *) echo "Opción inválida. Introduce un número del 0 al 5." ;;
+    esac
+done
