@@ -1,0 +1,99 @@
+#!/bin/bash
+
+#Script para configuracion inicial de red de un Centos.  
+
+while true; do
+    clear
+    echo "---------------------------------"
+    echo "          MENÚ PRINCIPAL         "
+    echo "---------------------------------"
+    echo "1. Versión del SO y kernel"
+    echo "2. Actualizar el SO y el kernel"
+    echo "3. Indicar los datos de las tarjetas de red"
+    echo "4. Modificar los parámetros de red (IP, DNS...)"
+    echo "5. Modificar el proxy del sistema"
+    echo "6. Verificacion de salida a internet"
+    echo "7. Salir"
+    echo "---------------------------------"
+    read -p "Seleccione una opción [1-7]: " opcion
+
+    case $opcion in
+        1)
+            echo "======================================"
+            echo "         VERSIÓN DEL SISTEMA          "
+            echo "======================================"
+       
+            echo "La versión del SO es: "
+            cat /etc/redhat-release
+            echo ""
+            echo "El kernel del sistema operativo es: "
+            uname -r
+            read -p "Presione enter para continuar..."
+            ;;
+        2)
+            echo "======================================"
+            echo "         ACTUALIZAR SISTEMA           "
+            echo "======================================"
+            echo "Iniciando actualización del sistema operativo y del kernel..."
+            yum update -y
+            read -p "Presione enter para continuar..."
+            ;;
+        3)
+            echo "======================================"
+            echo "      DATOS DE TARJETAS DE RED        "
+            echo "======================================"
+            echo "Mostrando información de las tarjetas de red..."
+            ifconfig -a
+            read -p "Presione enter para continuar..."
+            ;;
+        4)
+            echo "======================================"
+            echo "      MODIFICAR PARÁMETROS DE RED     "
+            echo "======================================"
+            read -p "Ingrese la dirección IP: " ip
+            read -p "Ingrese la máscara de red: " mascara
+            read -p "Ingrese la dirección del gateway: " gateway
+            read -p "Ingrese la dirección del DNS primario: " dns1
+            read -p "Ingrese la dirección del DNS secundario: " dns2
+            echo ""
+            echo "Guardando la configuración de red..."
+            echo "DEVICE=eth0
+IPADDR=$ip
+NETMASK=$mascara
+GATEWAY=$gateway
+DNS1=$dns1
+DNS2=$dns2" > /etc/sysconfig/network-scripts/ifcfg-eth0
+            echo "Configuración de red guardada correctamente."
+            read -p "Presione enter para continuar..."
+            ;;
+        5)
+            echo "======================================"
+            echo "        MODIFICAR PROXY DEL SISTEMA   "
+            echo "======================================"
+            read -p "Ingrese la dirección del servidor proxy: " proxy
+            read -p "Ingrese el puerto del servidor proxy: " puerto
+            echo ""
+            echo "Guardando la configuración del proxy..."
+            echo "export http_proxy=http://$proxy:$puerto
+            export https_proxy=http://$proxy:$puerto" >> /etc/profile.d/proxy.sh
+            echo "Configuración del proxy guardada correctamente."
+            read -p "Presione enter para continuar..."
+            ;;
+        6)
+            echo "======================================"
+            echo "      VERIFICAR SALIDA A INTERNET     "
+            echo "======================================"
+            ping -c 3 google.com
+            echo "Presione enter para continuar"
+            read
+            ;;
+        7)
+            echo "Finalizando el script... Hasta pronto, ¡fortuna y salud!"
+            exit
+            ;;
+        *)
+            echo "Opción No valida. Presiona enter para continuar..."
+            read
+            ;;
+    esac
+done
